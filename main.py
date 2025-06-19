@@ -10,7 +10,9 @@ def format_as_code_block(patterns: list, text: str) -> str:
 # Set up directories
 root_dir = Path(__file__).parent
 input_dir = root_dir / 'input_files'
+input_dir.mkdir(exist_ok=True)
 output_dir = root_dir / 'output_files'
+output_dir.mkdir(exist_ok=True)
 
 patterns = [
     r'\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b',  # emails
