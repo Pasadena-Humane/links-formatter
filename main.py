@@ -1,42 +1,39 @@
 from pathlib import Path
 import re
 
-def format_as_code_block(my_list: list) -> list:
+def format_as_code_block(patterns: list, text: str) -> str:
     '''Adds back-ticks to each item in a list'''
-    for i, item in enumerate(my_list):
-        my_list[i] = f'`{item}`'
+    for pattern in patterns:
+        text = re.sub(pattern, r'`\g<0>`', text)
+    return text
 
 # Set up directories
 root_dir = Path(__file__).parent
 input_dir = root_dir / 'input_files'
 output_dir = root_dir / 'output_files'
 
-# Regex patterns to search
-email_pattern = r'\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b'
-phone_pattern = r'\(?\d{3}\)?[-.\s]?\d{3}[-.\s]?\d{4}'
-website_pattern = r'https?://[^\s]+|www\.[^\s]+|(?<!@)\b[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}\b'
+patterns = [
+    r'\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b',  # emails
+    r'\(?\d{3}\)?[-.\s]?\d{3}[-.\s]?\d{4}(?:\s*x\s*\d+)?',   # phones with optional extensions
+    r'(?<!\]\()(https?://[^\s\)]+/?|www\.[^\s\)]+/?|(?<!@)\b[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}(?:/[^\s\)]*)?/?)\b(?!\))'  # websites/URLs excluding markdown links
+]
 
 # Iterate through input directory
 for file in input_dir.iterdir():
-    with open(file) as f:
-        print(f'Reading {file.name}...')
-        text = f.read()
+    if file.is_file():
+        print(f'Processing {file.name}...')
 
-        # Search results
-        emails_found = re.findall(email_pattern, text)
-        phones_found = re.findall(phone_pattern, text)
-        websites_found = re.findall(website_pattern, text)
+        text = file.read_text()
+        for pattern in patterns:
+            matches_found = re.findall(pattern, text)
+            print(f'Matches found: {matches_found}')
 
-        if emails_found:
-            print(f'Emails found: {emails_found}')
-            format_as_code_block(emails_found)
+        formatted_text = format_as_code_block(patterns, text)
 
-        if phones_found:
-            print(f'Phones found: {phones_found}')
-            format_as_code_block(phones_found)
-        
-        if websites_found:
-            print(f'Websites found: {websites_found}')
-            format_as_code_block(websites_found)
-
-        # NEED TO RE-WRITE FILE AND SAVE INTO OUTPUT DIRECTORY
+        # Check for trailing forward slashes
+        if '`/' in formatted_text:
+            formatted_text = formatted_text.replace('`/', '/`')
+            
+        new_file = output_dir / file.name
+        new_file.write_text(formatted_text)        
+        print(f'Formatted matches as code blocks!')
