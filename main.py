@@ -28,7 +28,7 @@ for file in input_dir.iterdir():
         text = file.read_text()
         for pattern in patterns:
             matches_found = re.findall(pattern, text)
-            print(f'Matches found: {matches_found}')
+            print(f'\nMatches found: {matches_found}')
 
         formatted_text = format_as_code_block(patterns, text)
 
@@ -38,4 +38,4 @@ for file in input_dir.iterdir():
             
         new_file = output_dir / file.name
         new_file.write_text(formatted_text)        
-        print(f'Formatted matches as code blocks!')
+        print(f'\nFormatted matches as code blocks!')
